@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Reminder</title>
+    <script>
+        function checkReminders() {
+            const tasks = JSON.parse('{{ tasks|tojson|safe }}');
+            const now = new Date();
+
+            tasks.forEach(task => {
+                const taskTime = new Date(task[2]);
+                if (taskTime <= now) {
+                    alert("Reminder: " + task[1]);
+                    // Add sound here
+                    let audio = new Audio('ding-126626.mp3');
+                    audio.play();
+
+                }
+            });
+        }
+
+        setInterval(checkReminders, 60000); // Check every minute
+    </script>
+</head>
+<body>
+    <h1>Task Reminder App</h1>
+    <form method="post" action="/add">
+        Task Name: <input type="text" name="task_name" required>
+        Reminder Time: <input type="datetime-local" name="reminder_time" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <h2>Task List</h2>
+    <ul>
+        {% for task in tasks %}
+        <li>{{ task[1] }} - {{ task[2] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
