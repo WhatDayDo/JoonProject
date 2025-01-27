@@ -2,39 +2,91 @@
 <html>
 <head>
     <title>Task Reminder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Task Reminder</title>
+    <!-- Bootstrap CSS -->
+    <link
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+        rel="stylesheet" 
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+        crossorigin="anonymous">
+    >
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12AxA0KC2W8PIEcmroIV8CrKDhDbPjiD/zJnrlBUCGxB6BOz"
+        crossorigin="anonymous"
+    ></script>
     <script>
         function checkReminders() {
-            const tasks = JSON.parse('{{ tasks|tojson|safe }}');
-            const now = new Date();
-
+            const now = new Date(); // Current date and time
+            const tasks = JSON.parse('{{ tasks|tojson|safe }}'); // Parse tasks data from Flask
+    
             tasks.forEach(task => {
-                const taskTime = new Date(task[2]);
-                if (taskTime <= now) {
-                    alert("Reminder: " + task[1]);
-                    // Add sound here
-                    let audio = new Audio('ding-126626.mp3');
-                    audio.play();
-
+                const taskTime = new Date(task[2]); // Convert reminder_time from the database to a Date object
+    
+                // Check if the current time matches the task's reminder time
+                if (Math.abs(taskTime - now) <= 60000) { // Allow a 1-minute tolerance
+                    alert("Reminder: " + task[1]); // Show the task name in an alert
+                    playSound(); // Play sound for the reminder
                 }
             });
         }
-
-        setInterval(checkReminders, 60000); // Check every minute
+    
+        // Play reminder sound
+        function playSound() {
+            const audio = new Audio('alarm-alert-sound-effect-230557.mp3'); // Ensure 'reminder.mp3' exists in the same folder
+            audio.play();
+        }
+    
+        // Check reminders every minute
+        setInterval(checkReminders, 60000);
     </script>
+    
 </head>
-<body>
-    <h1>Task Reminder App</h1>
-    <form method="post" action="/add">
-        Task Name: <input type="text" name="task_name" required>
-        Reminder Time: <input type="datetime-local" name="reminder_time" required>
-        <button type="submit">Add Task</button>
-    </form>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-6 text-primary">Task Reminder App</h1>
+            <p class="text-muted">Never miss your tasks again!</p>
+        </div>
 
-    <h2>Task List</h2>
-    <ul>
-        {% for task in tasks %}
-        <li>{{ task[1] }} - {{ task[2] }}</li>
-        {% endfor %}
-    </ul>
+        <!-- Task Form -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Add a New Task</h5>
+                <form method="post" action="/add" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="task_name" class="form-label">Task Name</label>
+                        <input type="text" id="task_name" name="task_name" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="reminder_time" class="form-label">Reminder Time</label>
+                        <input type="datetime-local" id="reminder_time" name="reminder_time" class="form-control" required>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary w-100">Add Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Your Tasks</h5>
+                <ul class="list-group">
+                    {% for task in tasks %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ task[1] }}
+                        <span class="badge bg-info text-dark">{{ task[2] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
