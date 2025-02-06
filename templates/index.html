@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Task Reminder</title>
+    <title>Home Schooling</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Task Reminder</title>
     <!-- Bootstrap CSS -->
-    <link
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-        rel="stylesheet" 
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-        crossorigin="anonymous">
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+          rel="stylesheet" 
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+          crossorigin="anonymous">
     <!-- Bootstrap JS -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12AxA0KC2W8PIEcmroIV8CrKDhDbPjiD/zJnrlBUCGxB6BOz"
-        crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ho+j7jyWK8fNQe+A12AxA0KC2W8PIEcmroIV8CrKDhDbPjiD/zJnrlBUCGxB6BOz"
+            crossorigin="anonymous"></script>
     <script>
         function checkReminders() {
             const now = new Date(); // Current date and time
@@ -42,27 +37,179 @@
         // Check reminders every minute
         setInterval(checkReminders, 60000);
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("showMainContent").addEventListener("click", function() {
+            document.getElementById("mainContent").style.display = "block";
+            document.getElementById("workPage").style.display = "none"; 
+        });
+    });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("showWorkContent").addEventListener("click", function() {
+                document.getElementById("workPage").style.display = "block"; 
+                document.getElementById("mainContent").style.display = "none"; 
+            });
+        });
+    </script>
+    <script>
+function submitWorkForm(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const workName = document.getElementById('work_name').value;
     
+    // Send data via AJAX
+    fetch('/save_work', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ work_name: workName }) // Send work name to the server
+    })
+    .then(response => response.json()) // Parse the response as JSON
+    .then(data => {
+        if (data.success) {
+            // Add new work to the list without refreshing
+            const workList = document.querySelector('.list-group');
+            const newWork = document.createElement('li');
+            newWork.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+            newWork.innerHTML = `${data.id} <span class="badge bg-info text-dark">Name: ${data.name}</span>`;
+            workList.appendChild(newWork);
+
+            // Clear the input field
+            document.getElementById('work_name').value = '';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+    
+    <style>
+        .canvas-area {
+            background-color: #ffffff; /* Light grey background */
+            border: 1px solid #a5a2a2;   /* Border for visibility */
+            border-radius: 8px;       /* Rounded corners */
+            padding: 20px;            /* Inner spacing */
+            min-height: 700px;  
+            max-width: 400px;
+        }
+
+         /* Shift the entire container 100px to the right */
+         .content-wrapper {
+            margin-left: 0px;
+        }
+
+        #mainContent {
+            margin-left:100px;
+            max-width: 800px;
+            padding: 20px;
+            display: none;
+             /* Hide only the main content initially */
+        }
+
+        #workPage {
+            border-radius: 8px;       /* Rounded corners */
+            padding: 20px;            /* Inner spacing */
+            max-width: 800px;
+            margin-left:100px;
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-light">
-    <div class="container py-4">
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <h1 class="display-6 text-primary">Task Reminder App</h1>
-            <p class="text-muted">Never miss your tasks again!</p>
-        </div>
-
-        <!-- Task Form -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Add a New Task</h5>
-                <form method="post" action="/add" class="row g-3">
-                    <div class="col-md-6">
-                        <label for="task_name" class="form-label">Task Name</label>
-                        <input type="text" id="task_name" name="task_name" class="form-control" required>
+    <div class="container py-4 content-wrapper">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="canvas-area">
+                    <div class="row g-3">
+                        <div class="card shadow-sm py-4 px-4" style="background-color: #0ec5f3">
+                            <img src="{{ url_for('static', filename='Person.png') }}" style="width: 75px; height: 85px; margin-right: 8px;">
+                            <h5>Name Surname</h5>
+                            <p>point: 0</p>
+                        </div>
+                    <!-- Example buttons -->
+                    <button id="showMainContent" class="btn btn-success col-md-12 d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='Clock.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                        Show Task Reminder
+                    </button>
+                    <button id="showWorkContent" class="btn btn-success col-md-12 d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='Note.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                        Show Work Page
+                    </button>
+                    <button class="btn btn-success col-md-12 d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='Activity.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                        Activities
+                    </button>
+                    <button class="btn btn-success col-md-12 d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='Points.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                        Points
+                    </button>
+                    <button class="btn btn-success col-md-12 d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='Shop.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                        Shop
+                    </button>
+                    <button class="btn btn-success col-md-12 d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='Mini games.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                        Mini Games
+                    </button>
                     </div>
-                    <div class="col-md-6">
-                        <label for="reminder_time" class="form-label">Reminder Time</label>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <div id="workPage" class="row g-3">
+                    <div class="text-center">
+                        <h1 class="display-6 text-primary">Work Page</h1> 
+                        <h5 class="card-title">Save Your Work for later!</h5>
+                    </div>
+                    <div class="card shadow-sm">
+                        <div class="card-body row g-3">
+                            <div class="col-md-12">
+                                <h5 class="card-title px-4">Save a work</h5>
+                                <label for="work_name" class="form-label px-4">Work Name</label>
+                                <form method="POST" action="{{ url_for('save_work') }}" class="col-md-12">
+                                    <input type="text" id="work_name" name="work_name" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">Save</button>
+                            </div>
+                                </form>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body row g-3">
+                            <h5 class="card-title px-4">Your Saved Work</h5>
+                            <ul class="list-group">
+                                {% for work in works %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ work[0] }} <!-- Display work name -->
+                                    <span class="badge bg-info text-dark">ID: {{ work[1] }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>                
+                <div id="mainContent" class="row">
+                <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="display-6 text-primary">Task Reminder</h1>
+                <p class="text-muted">Never miss your tasks again!</p>
+            </div>
+
+            <!-- Task Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Add a New Task</h5>
+                    <form method="post" action="/add" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="task_name" class="form-label">Task Name</label>
+                            <input type="text" id="task_name" name="task_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reminder_time" class="form-label">Reminder Time</label>
                         <input type="datetime-local" id="reminder_time" name="reminder_time" class="form-control" required>
                     </div>
                     <div class="col-12">
