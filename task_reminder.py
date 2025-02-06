@@ -10,11 +10,11 @@ def index():
     cursor = conn.cursor()
     
     # Fetch tasks
-    cursor.execute("SELECT * FROM tasks WHERE reminder_time >= datetime('now', '-1 day', '+7 hours')")
+    cursor.execute("SELECT * FROM tasks WHERE datetime(reminder_time) >= datetime('now','+7 hours')")
     tasks = cursor.fetchall()
     
     # Fetch works
-    cursor.execute("SELECT * FROM Works")
+    cursor.execute("SELECT id, name FROM Works where status = 1")
     works = cursor.fetchall()
     
     conn.close()
@@ -42,6 +42,27 @@ def save_work():
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
+
+#Route to Soft Delete a Work Task
+@app.route('/delete_work/<int:work_id>', methods=['POST'])
+def delete_work(work_id):
+    conn = sqlite3.connect('tasks.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Works SET status = 0 WHERE rowid = ?", (work_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True} 
+
+#Route to Fetch Active Work Tasks    
+@app.route('/get_work_tasks')
+def get_work_tasks():
+    conn = sqlite3.connect('tasks.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT rowid, name FROM Works WHERE status = 1")
+    work_tasks = cursor.fetchall()
+    conn.close()
+    
+    return {"tasks": work_tasks}
 
 
 

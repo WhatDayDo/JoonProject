@@ -8,6 +8,7 @@
           rel="stylesheet" 
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
           crossorigin="anonymous">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-ho+j7jyWK8fNQe+A12AxA0KC2W8PIEcmroIV8CrKDhDbPjiD/zJnrlBUCGxB6BOz"
@@ -30,9 +31,17 @@
     
         // Play reminder sound
         function playSound() {
-            const audio = new Audio('alarm-alert-sound-effect-230557.mp3'); // Ensure 'reminder.mp3' exists in the same folder
-            audio.play();
+            const audio = new Audio('/static/icicles.mp3');
+            audio.play().catch(error => {
+                console.log("Audio autoplay blocked. Trying with user interaction.");
+                document.body.addEventListener("click", function() {
+                    audio.play();
+                }, { once: true });
+            });
         }
+
+
+        
     
         // Check reminders every minute
         setInterval(checkReminders, 60000);
@@ -83,6 +92,48 @@ function submitWorkForm(event) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+function confirmDelete(workId) {
+    if (confirm("Are you sure you want to delete this work?")) {
+        fetch(`/delete_work/${workId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateWorkList(); // Refresh the list after deleting
+                } else {
+                    alert("Error deleting work task.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+    }
+}
+
+function updateWorkList() {
+    fetch('/get_work_tasks')
+        .then(response => response.json())
+        .then(data => {
+            const workList = document.querySelector(".list-group");
+            workList.innerHTML = ""; // Clear current list
+            
+            data.tasks.forEach(work => {
+                const listItem = document.createElement("li");
+                listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+                listItem.id = `work-${work[0]}`;
+                
+                listItem.innerHTML = `
+                    ${work[1]}
+                    <button class="btn btn-danger btn-sm" onclick="confirmDelete(${work[0]})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+
+                workList.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error("Error fetching work tasks:", error));
+}
+
+
 </script>
     
     <style>
@@ -183,12 +234,16 @@ function submitWorkForm(event) {
                             <h5 class="card-title px-4">Your Saved Work</h5>
                             <ul class="list-group">
                                 {% for work in works %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ work[0] }} <!-- Display work name -->
-                                    <span class="badge bg-info text-dark">ID: {{ work[1] }}</span>
+                                <li class="list-group-item d-flex justify-content-between align-items-center" id="work-{{ work[0] }}">
+                                    {{ work[1] }}
+                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('{{ work[0] }}')">
+                                        <i class="bi bi-trash"></i> <!-- Bootstrap Trash Icon -->
+                                    </button>
                                 </li>
                                 {% endfor %}
                             </ul>
+                            
+                            
                         </div>
                     </div>
                 </div>                
