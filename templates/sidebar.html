@@ -1,0 +1,46 @@
+<!-- User Greeting and Logout Button -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-6 text-primary">Task Reminder</h1>
+    <!-- <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a> -->
+</div>
+
+<div class="col-md-4">
+    <div class="canvas-area">
+        <div class="row g-3">
+            <div class="card shadow-sm py-4 px-4" style="background-color: #0ec5f3">
+                <img src="{{ url_for('static', filename='Person.png') }}" style="width: 75px; height: 85px; margin-right: 8px;">
+                <h5>{{ username }}</h5>
+                <p>Point: 0</p>
+            </div>
+            <!-- Navigation Buttons -->
+            <a href="{{ url_for('task_page') }}" class="btn btn-success col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='Clock.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Task Reminder
+            </a>
+            <a href="{{ url_for('work_page') }}" class="btn btn-success col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='Note.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Work Page
+            </a>
+            <button class="btn btn-success col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='Activity.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Activities
+            </button>
+            <button class="btn btn-success col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='Points.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Points
+            </button>
+            <button class="btn btn-success col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='Shop.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Shop
+            </button>
+            <button class="btn btn-success col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='Mini games.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Mini Games
+            </button>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger col-md-12 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='logout.png') }}" style="width: 25px; height: 25px; margin-right: 8px;">
+                Logout
+            </a>
+        </div>
+    </div>
+</div>

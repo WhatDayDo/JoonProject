@@ -168,6 +168,12 @@ function updateWorkList() {
         }
     </style>
 </head>
+<!-- User Greeting and Logout Button -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-6 text-primary">Task Reminder</h1>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+</div>
+
 <body class="bg-light">
     <div class="container py-4 content-wrapper">
         <div class="row">
