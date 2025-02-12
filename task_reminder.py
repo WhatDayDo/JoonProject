@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import jsonify  # Import jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -64,16 +65,16 @@ def logout():
 # 📌 Task Page
 @app.route('/tasks')
 def task_page():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+     if 'user_id' not in session:
+         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('tasks.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks WHERE datetime(reminder_time) >= datetime('now','+7 hours') AND user_id = ?", (session['user_id'],))
-    tasks = cursor.fetchall()
-    conn.close()
+     conn = sqlite3.connect('tasks.db')
+     cursor = conn.cursor()
+     cursor.execute("SELECT * FROM tasks WHERE datetime(reminder_time) >= datetime('now','+7 hours') AND user_id = ?", (session['user_id'],))
+     tasks = cursor.fetchall()
+     conn.close()
 
-    return render_template('tasks.html', tasks=tasks, username=session.get('username'))
+     return render_template('tasks.html', tasks=tasks, username=session.get('username'))
 
 # 📌 Work Page
 @app.route('/works')
@@ -106,6 +107,25 @@ def add_task():
     conn.close()
 
     return redirect(url_for('task_page'))
+
+from flask import jsonify  # Import jsonify
+
+@app.route('/get_tasks')
+def get_tasks():
+    if 'user_id' not in session:
+        return jsonify([])  # Return empty list if not logged in
+
+    conn = sqlite3.connect('tasks.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, reminder_time FROM tasks WHERE user_id = ?", (session['user_id'],))
+    tasks = cursor.fetchall()
+    conn.close()
+
+    # Convert tasks to JSON-friendly format
+    tasks_data = [{"id": t[0], "name": t[1], "reminder_time": t[2]} for t in tasks]
+
+    return jsonify(tasks_data)
+
 
 # 📌 Add Work
 @app.route('/add_work', methods=['POST'])
