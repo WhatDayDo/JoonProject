@@ -50,32 +50,39 @@ function updateWorkList() {
 </head>
 <body class="container">
     <div class="row">
-        <!-- Include Sidebar -->
         {% include 'sidebar.html' %}
         
-        <div class="col-md-8">
+        <div class="card col-md-8">
             <div class="d-flex justify-content-between align-items-center my-4">
                 <h2>Work Page</h2>
             </div>
 
-            <form method="post" action="{{ url_for('add_work') }}" class="row g-3">
-                <div class="col-md-12">
+            <form method="post" action="{{ url_for('add_work') }}" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-6">
                     <label for="work_name" class="form-label">Work Name</label>
                     <input type="text" id="work_name" name="work_name" class="form-control" required>
                 </div>
+                <div class="col-md-6">
+                    <label for="image" class="form-label">Upload Image</label>
+                    <input type="file" id="image" name="image" accept="image/*" class="form-control">
+                </div>
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary w-100">Save Work</button>
+                    <button type="submit" class="btn btn-primary w-100">Add Work</button>
                 </div>
             </form>
 
-            <h3 class="mt-4">Your Saved Work</h3>
+            <h3 class="mt-4">Your Work Tasks</h3>
             <ul class="list-group">
                 {% for work in works %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ work[1] }}
-                    <a href="#" onclick="confirmDelete('{{ work[0] }}')" class="btn btn-danger btn-sm">
-                        <i class="bi bi-trash">X</i>
-                    </a>
+                    <div>
+                        {% if work[2] %}
+                            <img src="data:image/png;base64,{{ work[2] }}" alt="Work Image" style="width: 50px; height: 50px; margin-right: 10px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='default-image.png') }}" alt="No Image" style="width: 50px; height: 50px; margin-right: 10px;">
+                        {% endif %}
+                        {{ work[1] }} 
+                    </div>
                 </li>
                 {% endfor %}
             </ul>

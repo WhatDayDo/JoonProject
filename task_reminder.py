@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import jsonify  # Import jsonify
+from flask import jsonify, Response  # Import jsonify
 import sqlite3
+import base64
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key_here"
@@ -84,11 +85,17 @@ def work_page():
 
     conn = sqlite3.connect('tasks.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT rowid, name FROM Works WHERE status = 1 AND user_id = ?", (session['user_id'],))
+    cursor.execute("SELECT rowid, name, image FROM Works WHERE status = 1 AND user_id = ?", (session['user_id'],))
     works = cursor.fetchall()
     conn.close()
 
-    return render_template('works.html', works=works, username=session.get('username'))
+    # Convert BLOB to Base64 for HTML display
+    works_with_images = [
+        (row[0], row[1], base64.b64encode(row[2]).decode('utf-8') if row[2] else None) 
+        for row in works
+    ]
+
+    return render_template('works.html', works=works_with_images, username=session.get('username'))
 
 # 📌 Add Task
 @app.route('/add_task', methods=['POST'])
@@ -134,15 +141,42 @@ def add_work():
         return redirect(url_for('login'))
 
     work_name = request.form['work_name']
+    image = request.files.get('image')  # Get uploaded image
+
+    image_data = None
+    if image and image.filename != '':
+        image_data = image.read()  # Read image as binary data
 
     conn = sqlite3.connect('tasks.db')
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO Works (name, user_id) VALUES (?, ?)", 
-                   (work_name, session['user_id']))
+    cursor.execute("""
+        INSERT INTO Works (name, image, user_id) 
+        VALUES (?, ?, ?)
+    """, (work_name, image_data, session['user_id']))
     conn.commit()
     conn.close()
 
     return redirect(url_for('work_page'))
+
+
+@app.route('/view_work_image')
+def view_work_image():
+    if 'user_id' not in session:
+        return "User not logged in", 401
+
+    conn = sqlite3.connect('tasks.db')
+    cursor = conn.cursor()
+    
+    # Fetch the first image associated with the current user
+    cursor.execute("SELECT image FROM Works WHERE user_id = ? LIMIT 1", (session['user_id'],))
+    image_data = cursor.fetchone()
+    conn.close()
+
+    if image_data and image_data[0]:
+        # Send the image in the response
+        return Response(image_data[0], mimetype='image/png')
+    return "No image available", 404
+
 
 #Route to Soft Delete a Work Task
 @app.route('/delete_work/<int:work_id>', methods=['POST'])
