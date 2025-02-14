@@ -85,17 +85,18 @@ def work_page():
 
     conn = sqlite3.connect('tasks.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT rowid, name, image FROM Works WHERE status = 1 AND user_id = ?", (session['user_id'],))
+    cursor.execute("SELECT rowid, name, image FROM Works WHERE user_id = ? AND status = 1", (session['user_id'],))
     works = cursor.fetchall()
     conn.close()
 
     # Convert BLOB to Base64 for HTML display
     works_with_images = [
-        (row[0], row[1], base64.b64encode(row[2]).decode('utf-8') if row[2] else None) 
-        for row in works
-    ]
+         (row[0], row[1], base64.b64encode(row[2]).decode('utf-8') if row[2] else None) 
+         for row in works
+     ]
 
     return render_template('works.html', works=works_with_images, username=session.get('username'))
+
 
 # 📌 Add Task
 @app.route('/add_task', methods=['POST'])
@@ -189,16 +190,7 @@ def delete_work(work_id):
     
     return {"success": True}
 
-#Route to Fetch Active Work Tasks    
-@app.route('/get_work_tasks')
-def get_work_tasks():
-    conn = sqlite3.connect('tasks.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT rowid, name FROM Works WHERE status = 1 AND user_id = ?", (session['user_id'],))
-    work_tasks = cursor.fetchall()
-    conn.close()
-    
-    return {"tasks": work_tasks}
+
 
 # 📌 Run Flask App
 if __name__ == "__main__":
