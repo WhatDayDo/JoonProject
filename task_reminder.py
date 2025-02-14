@@ -178,7 +178,7 @@ def view_work_image():
     return "No image available", 404
 
 
-#Route to Soft Delete a Work Task
+#Route to Soft Delete a Work Task 
 @app.route('/delete_work/<int:work_id>', methods=['POST'])
 def delete_work(work_id):
     conn = sqlite3.connect('tasks.db')
@@ -186,7 +186,8 @@ def delete_work(work_id):
     cursor.execute("UPDATE Works SET status = 0 WHERE rowid = ?", (work_id,))
     conn.commit()
     conn.close()
-    return {"success": True} 
+    
+    return {"success": True}
 
 #Route to Fetch Active Work Tasks    
 @app.route('/get_work_tasks')

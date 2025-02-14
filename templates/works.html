@@ -7,45 +7,49 @@
 
 
     <script>
-        function confirmDelete(workId) {
-    if (confirm("Are you sure you want to delete this work?")) {
-        fetch(`/delete_work/${workId}`, { method: 'POST' })
+        function confirmDeleteWork(workId) {
+            if (confirm("Are you sure you want to delete this work?")) {
+                fetch(`/delete_work/${workId}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove work item from the UI without reloading the page
+                            const workElement = document.getElementById(`work-${workId}`);
+                            if (workElement) {
+                                workElement.remove();
+                            }
+                        } else {
+                            alert("Error deleting work task.");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+        }
+
+    function updateWorkList() {
+        fetch('/get_work_tasks')
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    updateWorkList(); // Refresh the list after deleting
-                } else {
-                    alert("Error deleting work task.");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-    }
-}
-
-function updateWorkList() {
-    fetch('/get_work_tasks')
-        .then(response => response.json())
-        .then(data => {
-            const workList = document.querySelector(".list-group");
-            workList.innerHTML = ""; // Clear current list
-            
-            data.tasks.forEach(work => {
-                const listItem = document.createElement("li");
-                listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-                listItem.id = `work-${work[0]}`;
+                const workList = document.querySelector(".list-group");
+                workList.innerHTML = ""; // Clear current list
                 
-                listItem.innerHTML = `
-                    ${work[1]}
-                    <button class="btn btn-danger btn-sm" onclick="confirmDelete(${work[0]})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                `;
+                data.tasks.forEach(work => {
+                    const listItem = document.createElement("li");
+                    listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+                    listItem.id = `work-${work[0]}`;
+                    
+                    listItem.innerHTML = `
+                        ${work[1]}
+                        <button class="btn btn-danger btn-sm" onclick="confirmDelete(${work[0]})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    `;
 
-                workList.appendChild(listItem);
-            });
-        })
-        .catch(error => console.error("Error fetching work tasks:", error));
-}
+                    workList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error("Error fetching work tasks:", error));
+    }
     </script>
 </head>
 <body class="container">
@@ -74,18 +78,24 @@ function updateWorkList() {
             <h3 class="mt-4">Your Work Tasks</h3>
             <ul class="list-group">
                 {% for work in works %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
+                <li class="list-group-item d-flex justify-content-between align-items-center" id="work-{{ work[0] }}">
+                    <div class="d-flex align-items-center">
                         {% if work[2] %}
-                            <img src="data:image/png;base64,{{ work[2] }}" alt="Work Image" style="width: 50px; height: 50px; margin-right: 10px;">
+                            <img src="data:image/png;base64,{{ work[2] }}" alt="Work Image" 
+                                style="width: 50px; height: 50px; margin-right: 10px;">
                         {% else %}
-                            <img src="{{ url_for('static', filename='default-image.png') }}" alt="No Image" style="width: 50px; height: 50px; margin-right: 10px;">
+                            <img src="{{ url_for('static', filename='default-image.png') }}" alt="No Image"
+                                style="width: 50px; height: 50px; margin-right: 10px;">
                         {% endif %}
-                        {{ work[1] }} 
+                        <span>{{ work[1] }}</span>
                     </div>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDeleteWork('{{ work[0] }}')">
+                        <i class="bi bi-trash">X</i>
+                    </button>
                 </li>
                 {% endfor %}
             </ul>
+
         </div>
     </div>
 </body>
